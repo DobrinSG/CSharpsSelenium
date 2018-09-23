@@ -6,7 +6,7 @@ using System.Threading;
 namespace SeleniumWebDriver
 {
     [TestClass]
-    public class HomePageTests
+    public class AdminUserTests
     {
         IWebDriver driver;
 
@@ -16,33 +16,9 @@ namespace SeleniumWebDriver
             driver = new ChromeDriver();
             driver.Manage().Window.Maximize();
             driver.Navigate().GoToUrl("https://fluxday.io/");
-        }
-
-        [TestCleanup]
-        public void TestTeardown()
-        {
-            driver.Quit();
-        }
-
-        [TestCategory("HomePageTests")]
-        [TestMethod]
-        public void Test001NavigateToHomePage()
-        {
-
-            IWebElement pageTitle = driver.FindElement(By.ClassName("name"));
-            var actualResult = pageTitle.Text;
-
-            var expectedResult = "opensource task & productivity management tool for startups".ToUpper();
-            Assert.AreEqual(expectedResult, actualResult);
-        }
-
-        [TestCategory("HomePageTests")]
-        [TestMethod]
-        public void Test002NavigateToLiveDemoLoginPage()
-        {
             var demoLink = driver.FindElement(By.XPath("//a[contains(text(), 'Demo')]"));
             demoLink.Click();
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             var tryLiveDemo = driver.FindElement(By.CssSelector(".text-center.spacer a"));
             tryLiveDemo.Click();
@@ -52,8 +28,32 @@ namespace SeleniumWebDriver
             driver.SwitchTo().Window(tabs[tabs.Count - 1]);
 
             var emailInput = driver.FindElement(By.Id("user_email"));
+            emailInput.SendKeys("admin@fluxday.io");
 
-            Assert.IsNotNull(emailInput);
+            var passwordInput = driver.FindElement(By.Id("user_password"));
+            passwordInput.SendKeys("password");
+
+            var clickLogin = driver.FindElement(By.ClassName("btn-login"));
+            clickLogin.Click();   
+        }
+
+        [TestCleanup]
+        public void TestTeardown()
+        {
+            driver.Quit();
+        }
+       
+        [TestCategory("AdminUserTests")]
+        [TestMethod]
+        public void Test001LogInAsAnAdmin()
+        {           
+            var adminUserLink = driver.FindElement(By.XPath("/html/body/div[2]/div[1]/ul[3]/li[1]/a"));
+
+            var actualResult = adminUserLink.Text;
+
+            var expectedResult = "Admin User";
+
+            Assert.AreEqual(expectedResult, actualResult);
         }
     }
 }
