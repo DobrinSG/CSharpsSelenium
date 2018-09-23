@@ -9,7 +9,7 @@ namespace SeleniumWebDriver
     public class AdminUserTests
     {
         IWebDriver driver;
-
+        
         [TestInitialize]
         public void TestSetup()
         {
@@ -33,6 +33,8 @@ namespace SeleniumWebDriver
             var passwordInput = driver.FindElement(By.Id("user_password"));
             passwordInput.SendKeys("password");
 
+            Thread.Sleep(1000);
+
             var clickLogin = driver.FindElement(By.ClassName("btn-login"));
             clickLogin.Click();   
         }
@@ -47,13 +49,65 @@ namespace SeleniumWebDriver
         [TestMethod]
         public void Test001LogInAsAnAdmin()
         {           
-            var adminUserLink = driver.FindElement(By.XPath("/html/body/div[2]/div[1]/ul[3]/li[1]/a"));
+            var adminUserLink = driver.FindElement(By.LinkText("Admin User"));
 
             var actualResult = adminUserLink.Text;
 
             var expectedResult = "Admin User";
 
             Assert.AreEqual(expectedResult, actualResult);
+        }
+
+        [TestCategory("AdminUserTests")]
+        [TestMethod]
+        public void Test002AssignTeamLeadAsManagerInFinanceDepartment()
+        {
+            var departmentsLink = driver.FindElement(By.LinkText("Departments"));
+            departmentsLink.Click();
+
+            Thread.Sleep(1000);
+
+            var financeDepartment = driver.FindElement(By.XPath("//*[@id=\"pane2\"]/div[2]/a[3]/div"));
+            financeDepartment.Click();
+
+            Thread.Sleep(1000);
+
+            var gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
+            gearIcon.Click();
+
+            var editOption = driver.FindElement(By.LinkText("Edit"));
+            editOption.Click();
+
+            Thread.Sleep(1000);
+
+            var textField = driver.FindElement(By.Id("s2id_autogen1"));
+            textField.Click();
+
+            var teamLeadRole = driver.FindElement(By.XPath("//*[@id=\"project_user_ids\"]/option[2]"));
+            teamLeadRole.Click();
+
+            var saveButton = driver.FindElement(By.ClassName("button"));
+            saveButton.Click();
+
+            var managersLink = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[2]/dl/dd[3]/a"));
+            managersLink.Click();
+
+            var teamLeadManager = driver.FindElement(By.LinkText("Team Lead"));
+
+            var expectedResult = "Team Lead";
+            var actualResult = teamLeadManager.Text;
+
+            Assert.AreEqual(expectedResult, actualResult);
+
+            gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
+            gearIcon.Click();
+            editOption = driver.FindElement(By.LinkText("Edit"));
+            editOption.Click();
+            Thread.Sleep(1000);
+            teamLeadRole = driver.FindElement(By.XPath("//*[@id=\"project_user_ids\"]/option[2]"));
+            teamLeadRole.Click();
+            saveButton = driver.FindElement(By.ClassName("button"));
+            saveButton.Click();
         }
     }
 }
