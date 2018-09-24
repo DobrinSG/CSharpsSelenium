@@ -43,7 +43,7 @@ namespace SeleniumWebDriver
         [TestCleanup]
         public void TestTeardown()
         {
-            driver.Quit();
+          //  driver.Quit();
         }
        
         [TestCategory("AdminUserTests")]
@@ -169,9 +169,76 @@ namespace SeleniumWebDriver
             var actualResult = verifyUserName.Text;
 
             Assert.AreEqual(expectedResult, actualResult);
-
         }
 
+        [TestCategory("AdminUserTests")]
+        [TestMethod]
+        public void Test005ChangeYourOwnPasswordAsAdmin()
+        {
+            var email = "admin@fluxday.io";
+            var newPassword = "123456789";
+            var oldPassword = "password";
+
+            var adminUserLink = driver.FindElement(By.LinkText("Admin User"));
+            adminUserLink.Click();
+
+            Thread.Sleep(1000);
+
+            var gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
+            gearIcon.Click();
+
+            var changePasswordOption = driver.FindElement(By.LinkText("Change password"));
+            changePasswordOption.Click();
+
+            var passwordField = driver.FindElement(By.Id("user_password"));
+            passwordField.SendKeys(newPassword);
+
+            var confirmPasswordField = driver.FindElement(By.Id("user_password_confirmation"));
+            confirmPasswordField.SendKeys(newPassword);
+
+            var saveButton = driver.FindElement(By.ClassName("button"));
+            saveButton.Click();
+
+            var emailInput = driver.FindElement(By.Id("user_email"));
+            emailInput.SendKeys(email);
+
+            var passwordInput = driver.FindElement(By.Id("user_password"));
+            passwordInput.SendKeys(newPassword);
+
+            Thread.Sleep(1000);
+
+            var clickLogin = driver.FindElement(By.ClassName("btn-login"));
+            clickLogin.Click();
+
+            Test001LogInAsAnAdmin();
+
+            gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
+            gearIcon.Click();
+
+            changePasswordOption = driver.FindElement(By.LinkText("Change password"));
+            changePasswordOption.Click();
+
+            Thread.Sleep(1000);
+
+            passwordField = driver.FindElement(By.Id("user_password"));
+            passwordField.SendKeys(oldPassword);
+
+            confirmPasswordField = driver.FindElement(By.Id("user_password_confirmation"));
+            confirmPasswordField.SendKeys(oldPassword);
+
+            saveButton = driver.FindElement(By.ClassName("button"));
+            saveButton.Click();
+
+            emailInput = driver.FindElement(By.Id("user_email"));
+            emailInput.SendKeys(email);
+
+            passwordInput = driver.FindElement(By.Id("user_password"));
+            passwordInput.SendKeys(oldPassword);
+
+            clickLogin = driver.FindElement(By.ClassName("btn-login"));
+            clickLogin.Click();
+
+        }
 
         private void AssignManager()
         {
