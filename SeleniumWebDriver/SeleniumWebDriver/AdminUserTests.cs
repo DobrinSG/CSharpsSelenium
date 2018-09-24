@@ -102,7 +102,8 @@ namespace SeleniumWebDriver
 
             var name = driver.FindElement(By.Id("okr_name"));
             DateTime dateTime = DateTime.Now;
-            name.SendKeys(dateTime.ToString());
+            var Milliseconds = dateTime.Millisecond;
+            name.SendKeys($"Test{Milliseconds}");
 
             var objectives = driver.FindElement(By.Id("okr_objectives_attributes_0_name"));
             objectives.SendKeys("Test");
@@ -119,13 +120,59 @@ namespace SeleniumWebDriver
             var okrName = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[2]/div[1]"));
 
 
-            var expectedResult = dateTime.ToString();
+            var expectedResult = $"Test{Milliseconds}";
             var actualResult = okrName.Text;
 
             Assert.AreEqual(expectedResult, actualResult);
             
         }
-        
+
+        [TestCategory("AdminUserTests")]
+        [TestMethod]
+        public void Test004AddUser()
+        {
+            var users = driver.FindElement(By.XPath("/html/body/div[2]/div[1]/ul[2]/li[5]/a"));
+            users.Click();
+
+            Thread.Sleep(1000);
+            var addUser = driver.FindElement(By.LinkText("Add user"));
+            addUser.Click();
+
+            DateTime dateTime = DateTime.Now;
+            var userName = dateTime.Millisecond;
+
+
+            var nameField = driver.FindElement(By.Id("user_name"));
+            nameField.SendKeys($"Test{userName}");
+
+            var nickname = driver.FindElement(By.Id("user_nickname"));
+            nickname.SendKeys($"T{userName}");
+
+            var email = driver.FindElement(By.Id("user_email"));
+            email.SendKeys($"Test{userName}@fluxday.io");
+
+            var employeeCode = driver.FindElement(By.Id("user_employee_code"));
+            employeeCode.SendKeys($"Test{userName}");
+
+            var password = driver.FindElement(By.Id("user_password"));
+            password.SendKeys("password");
+
+            var confirmPassword = driver.FindElement(By.Id("user_password_confirmation"));
+            confirmPassword.SendKeys("password");
+
+            var saveButton = driver.FindElement(By.ClassName("button"));
+            saveButton.Click();
+
+            var verifyUserName = driver.FindElement(By.LinkText($"Test{userName}"));
+
+            var expectedResult = $"Test{userName}";
+            var actualResult = verifyUserName.Text;
+
+            Assert.AreEqual(expectedResult, actualResult);
+
+        }
+
+
         private void AssignManager()
         {
             var gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
