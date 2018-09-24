@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using System;
 using System.Threading;
 
 namespace SeleniumWebDriver
@@ -72,6 +73,61 @@ namespace SeleniumWebDriver
 
             Thread.Sleep(1000);
 
+            AssignManager();
+
+            var managersLink = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[2]/dl/dd[3]/a"));
+            managersLink.Click();
+            
+            var teamLeadManager = driver.FindElement(By.LinkText("Team Lead"));
+            
+            var expectedResult = "Team Lead";
+            var actualResult = teamLeadManager.Text; 
+
+            Assert.AreEqual(expectedResult, actualResult);
+
+            AssignManager();
+        }
+
+        [TestCategory("AdminUserTests")]
+        [TestMethod]
+        public void Test003AddOkr()
+        {
+            var okrLink = driver.FindElement(By.LinkText("OKR"));
+            okrLink.Click();
+
+            Thread.Sleep(1000);
+
+            var newOkrLink = driver.FindElement(By.LinkText("New OKR"));
+            newOkrLink.Click();
+
+            var name = driver.FindElement(By.Id("okr_name"));
+            DateTime dateTime = DateTime.Now;
+            name.SendKeys(dateTime.ToString());
+
+            var objectives = driver.FindElement(By.Id("okr_objectives_attributes_0_name"));
+            objectives.SendKeys("Test");
+
+            var keyResult = driver.FindElement(By.Id("okr_objectives_attributes_0_key_results_attributes_0_name"));
+            keyResult.SendKeys("Test");
+
+            var keyResult1 = driver.FindElement(By.Id("okr_objectives_attributes_0_key_results_attributes_1_name"));
+            keyResult1.SendKeys("Test");
+
+            var saveButton = driver.FindElement(By.ClassName("button"));
+            saveButton.Click();
+
+            var okrName = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[2]/div[1]"));
+
+
+            var expectedResult = dateTime.ToString();
+            var actualResult = okrName.Text;
+
+            Assert.AreEqual(expectedResult, actualResult);
+            
+        }
+        
+        private void AssignManager()
+        {
             var gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
             gearIcon.Click();
 
@@ -87,26 +143,6 @@ namespace SeleniumWebDriver
             teamLeadRole.Click();
 
             var saveButton = driver.FindElement(By.ClassName("button"));
-            saveButton.Click();
-
-            var managersLink = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[2]/dl/dd[3]/a"));
-            managersLink.Click();
-
-            var teamLeadManager = driver.FindElement(By.LinkText("Team Lead"));
-
-            var expectedResult = "Team Lead";
-            var actualResult = teamLeadManager.Text;
-
-            Assert.AreEqual(expectedResult, actualResult);
-
-            gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
-            gearIcon.Click();
-            editOption = driver.FindElement(By.LinkText("Edit"));
-            editOption.Click();
-            Thread.Sleep(1000);
-            teamLeadRole = driver.FindElement(By.XPath("//*[@id=\"project_user_ids\"]/option[2]"));
-            teamLeadRole.Click();
-            saveButton = driver.FindElement(By.ClassName("button"));
             saveButton.Click();
         }
     }
