@@ -16,7 +16,20 @@ namespace SeleniumWebDriver
         {
             driver = new ChromeDriver();
             driver.Manage().Window.Maximize();
+        }
+
+        [TestCleanup]
+        public void TestTeardown()
+        {
+            driver.Quit();
+        }
+       
+        [TestCategory("AdminUserTests")]
+        [TestMethod]
+        public void Test001LogInAsAnAdmin()
+        {
             driver.Navigate().GoToUrl("https://fluxday.io/");
+
             var demoLink = driver.FindElement(By.XPath("//a[contains(text(), 'Demo')]"));
             demoLink.Click();
             Thread.Sleep(1000);
@@ -28,49 +41,26 @@ namespace SeleniumWebDriver
             var tabs = driver.WindowHandles;
             driver.SwitchTo().Window(tabs[tabs.Count - 1]);
 
-            var emailInput = driver.FindElement(By.Id("user_email"));
-            emailInput.SendKeys("admin@fluxday.io");
+            LoginAsAnAdmin("admin@fluxday.io", "password");
+            Thread.Sleep(2000);
 
-            var passwordInput = driver.FindElement(By.Id("user_password"));
-            passwordInput.SendKeys("password");
-
-            Thread.Sleep(1000);
-
-            var clickLogin = driver.FindElement(By.ClassName("btn-login"));
-            clickLogin.Click();   
-        }
-
-        [TestCleanup]
-        public void TestTeardown()
-        {
-          //  driver.Quit();
-        }
-       
-        [TestCategory("AdminUserTests")]
-        [TestMethod]
-        public void Test001LogInAsAnAdmin()
-        {           
-            var adminUserLink = driver.FindElement(By.LinkText("Admin User"));
-
-            var actualResult = adminUserLink.Text;
-
-            var expectedResult = "Admin User";
-
-            Assert.AreEqual(expectedResult, actualResult);
+            VerifyLoginAsAnAdmin();
         }
 
         [TestCategory("AdminUserTests")]
         [TestMethod]
         public void Test002AssignTeamLeadAsManagerInFinanceDepartment()
         {
+            driver.Navigate().GoToUrl("https://app.fluxday.io/users/sign_in");
+
+            LoginAsAnAdmin("admin@fluxday.io", "password");
+
             var departmentsLink = driver.FindElement(By.LinkText("Departments"));
             departmentsLink.Click();
-
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
             var financeDepartment = driver.FindElement(By.XPath("//*[@id=\"pane2\"]/div[2]/a[3]/div"));
             financeDepartment.Click();
-
             Thread.Sleep(1000);
 
             AssignManager();
@@ -92,18 +82,21 @@ namespace SeleniumWebDriver
         [TestMethod]
         public void Test003AddOkr()
         {
+            driver.Navigate().GoToUrl("https://app.fluxday.io/users/sign_in");
+
+            LoginAsAnAdmin("admin@fluxday.io", "password");
+
             var okrLink = driver.FindElement(By.LinkText("OKR"));
             okrLink.Click();
-
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
             var newOkrLink = driver.FindElement(By.LinkText("New OKR"));
             newOkrLink.Click();
 
-            var name = driver.FindElement(By.Id("okr_name"));
+            var nameField = driver.FindElement(By.Id("okr_name"));
             DateTime dateTime = DateTime.Now;
-            var Milliseconds = dateTime.Millisecond;
-            name.SendKeys($"Test{Milliseconds}");
+            var name = dateTime.Millisecond;
+            nameField.SendKeys($"Test{name}");
 
             var objectives = driver.FindElement(By.Id("okr_objectives_attributes_0_name"));
             objectives.SendKeys("Test");
@@ -119,28 +112,29 @@ namespace SeleniumWebDriver
 
             var okrName = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[2]/div[1]"));
 
-
-            var expectedResult = $"Test{Milliseconds}";
+            var expectedResult = $"Test{name}";
             var actualResult = okrName.Text;
 
-            Assert.AreEqual(expectedResult, actualResult);
-            
+            Assert.AreEqual(expectedResult, actualResult);           
         }
 
         [TestCategory("AdminUserTests")]
         [TestMethod]
         public void Test004AddUser()
         {
+            driver.Navigate().GoToUrl("https://app.fluxday.io/users/sign_in");
+
+            LoginAsAnAdmin("admin@fluxday.io", "password");
+
             var users = driver.FindElement(By.XPath("/html/body/div[2]/div[1]/ul[2]/li[5]/a"));
             users.Click();
+            Thread.Sleep(2000);
 
-            Thread.Sleep(1000);
             var addUser = driver.FindElement(By.LinkText("Add user"));
             addUser.Click();
 
             DateTime dateTime = DateTime.Now;
             var userName = dateTime.Millisecond;
-
 
             var nameField = driver.FindElement(By.Id("user_name"));
             nameField.SendKeys($"Test{userName}");
@@ -175,69 +169,51 @@ namespace SeleniumWebDriver
         [TestMethod]
         public void Test005ChangeYourOwnPasswordAsAdmin()
         {
-            var email = "admin@fluxday.io";
+            driver.Navigate().GoToUrl("https://app.fluxday.io/users/sign_in");
+
+            var emailInput = "admin@fluxday.io";
             var newPassword = "123456789";
             var oldPassword = "password";
 
+            LoginAsAnAdmin(emailInput, oldPassword);
+
             var adminUserLink = driver.FindElement(By.LinkText("Admin User"));
             adminUserLink.Click();
-
             Thread.Sleep(1000);
 
-            var gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
-            gearIcon.Click();
+            ChangePassword(newPassword);
 
-            var changePasswordOption = driver.FindElement(By.LinkText("Change password"));
-            changePasswordOption.Click();
+            LoginAsAnAdmin(emailInput, newPassword);
 
-            var passwordField = driver.FindElement(By.Id("user_password"));
-            passwordField.SendKeys(newPassword);
+            VerifyLoginAsAnAdmin();
 
-            var confirmPasswordField = driver.FindElement(By.Id("user_password_confirmation"));
-            confirmPasswordField.SendKeys(newPassword);
+            ChangePassword(oldPassword);
 
-            var saveButton = driver.FindElement(By.ClassName("button"));
-            saveButton.Click();
+            LoginAsAnAdmin(emailInput, oldPassword);
+        }
 
+        private void LoginAsAnAdmin(string email, string password)
+        {
             var emailInput = driver.FindElement(By.Id("user_email"));
             emailInput.SendKeys(email);
 
             var passwordInput = driver.FindElement(By.Id("user_password"));
-            passwordInput.SendKeys(newPassword);
-
+            passwordInput.SendKeys(password);
             Thread.Sleep(1000);
 
             var clickLogin = driver.FindElement(By.ClassName("btn-login"));
             clickLogin.Click();
+        }
 
-            Test001LogInAsAnAdmin();
+        private void VerifyLoginAsAnAdmin()
+        {
+            var adminUserLink = driver.FindElement(By.LinkText("Admin User"));
 
-            gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
-            gearIcon.Click();
+            var actualResult = adminUserLink.Text;
 
-            changePasswordOption = driver.FindElement(By.LinkText("Change password"));
-            changePasswordOption.Click();
+            var expectedResult = "Admin User";
 
-            Thread.Sleep(1000);
-
-            passwordField = driver.FindElement(By.Id("user_password"));
-            passwordField.SendKeys(oldPassword);
-
-            confirmPasswordField = driver.FindElement(By.Id("user_password_confirmation"));
-            confirmPasswordField.SendKeys(oldPassword);
-
-            saveButton = driver.FindElement(By.ClassName("button"));
-            saveButton.Click();
-
-            emailInput = driver.FindElement(By.Id("user_email"));
-            emailInput.SendKeys(email);
-
-            passwordInput = driver.FindElement(By.Id("user_password"));
-            passwordInput.SendKeys(oldPassword);
-
-            clickLogin = driver.FindElement(By.ClassName("btn-login"));
-            clickLogin.Click();
-
+            Assert.AreEqual(expectedResult, actualResult);
         }
 
         private void AssignManager()
@@ -247,14 +223,32 @@ namespace SeleniumWebDriver
 
             var editOption = driver.FindElement(By.LinkText("Edit"));
             editOption.Click();
+            Thread.Sleep(2000); 
 
-            Thread.Sleep(1000);
-
-            var textField = driver.FindElement(By.Id("s2id_autogen1"));
+            var textField = driver.FindElement(By.Id("s2id_project_user_ids"));
             textField.Click();
 
             var teamLeadRole = driver.FindElement(By.XPath("//*[@id=\"project_user_ids\"]/option[2]"));
             teamLeadRole.Click();
+
+            var saveButton = driver.FindElement(By.ClassName("button"));
+            saveButton.Click();
+        }
+
+        private void ChangePassword(string password)
+        {
+            var gearIcon = driver.FindElement(By.XPath("//*[@id=\"pane3\"]/div/div[1]/div[2]/a/div"));
+            gearIcon.Click();
+
+            var changePasswordOption = driver.FindElement(By.LinkText("Change password"));
+            changePasswordOption.Click();
+            Thread.Sleep(2000);
+
+            var passwordField = driver.FindElement(By.Id("user_password"));
+            passwordField.SendKeys(password);
+
+            var confirmPasswordField = driver.FindElement(By.Id("user_password_confirmation"));
+            confirmPasswordField.SendKeys(password);
 
             var saveButton = driver.FindElement(By.ClassName("button"));
             saveButton.Click();
